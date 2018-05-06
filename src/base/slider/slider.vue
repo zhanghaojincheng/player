@@ -5,7 +5,7 @@
       </slot>
     </div>
     <div class="dots">
-      <div></div>
+      <span class="dot" v-for="(item, index) in dots" :class="{ active: index === currentPageIndex}" :key="item"></span>
     </div>
   </div>
 </template>
@@ -25,51 +25,52 @@ export default {
     },
     interval: {
       type: Number,
-      default: 3000
+      default: 1500
     }
   },
   data () {
     return {
-      msg: 1
+      dots: [],
+      currentPageIndex: 0
     }
   },
   created: function () {
     setTimeout(() => {
-      console.log(456)
       this._setSliderWidth()
+      this._initDots()
       this._initSlider()
+      if (this.autoPlay) {
+        this._play()
+      }
     }, 20)
-  },
-  beforeMount: function () {
-    console.log(123)
-  },
-  mounted: function () {
-    console.log(789)
-  },
-  beforeUpdate: function () {
-    console.log(888)
-  },
-  updated: function () {
-    console.log(999)
+    window.onresize = () => {
+      if (this.slider) {
+        this._setSliderWidth(true)
+        this.slider.refresh()
+      }
+    }
   },
   methods: {
-    _setSliderWidth () {
+    _setSliderWidth (isResize) {
       let width = 0
       let sliderWidth = this.$refs.slider.clientWidth
-      let children = this.$refs.sliderGroup.children
-      for (let i = 0; i < children.length; i++) {
-        let child = children[i]
+      this.children = this.$refs.sliderGroup.children
+      for (let i = 0; i < this.children.length; i++) {
+        let child = this.children[i]
         child.style.width = sliderWidth + 'px'
         addClass(child, 'slider-item')
         width += sliderWidth
       }
-      if (this.loop) {
+      if (this.loop && !isResize) {
         width += 2 * sliderWidth
       }
       this.$refs.sliderGroup.style.width = width + 'px'
     },
+    _initDots () {
+      this.dots = new Array(this.children.length)
+    },
     _initSlider () {
-      this.slider = new BScroll(this.$refs.slider,{
+      this.slider = new BScroll(this.$refs.slider, {
         scrollX: true,
         scrollY: false,
         momentum: false,
@@ -79,6 +80,21 @@ export default {
           speed: 400
         }
       })
+      this.slider.on('scrollEnd', () => {
+        this.currentPageIndex = this.slider.getCurrentPage().pageX
+        if (this.loop) {
+          clearTimeout(this.timer)
+          this._play()
+        }
+      })
+    },
+    _play () {
+      this.timer = setTimeout(() => {
+        if (this.currentPageIndex === this.children.length - 3) {
+          this.currentPageIndex = -1
+        }
+        this.slider.goToPage(this.currentPageIndex + 1, 0, 400)
+      }, this.interval)
     }
   }
 }
