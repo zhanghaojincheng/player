@@ -34,7 +34,7 @@ export default {
       currentPageIndex: 0
     }
   },
-  created: function () {
+  mounted: function () {
     setTimeout(() => {
       this._setSliderWidth()
       this._initDots()
@@ -96,6 +96,11 @@ export default {
         this.slider.goToPage(this.currentPageIndex + 1, 0, 400)
       }, this.interval)
     }
+  },
+  destoryed: function () {
+    console.log(5678)
+    console.log(567)
+    clearTimeout(this.timer)
   }
 }
 </script>
