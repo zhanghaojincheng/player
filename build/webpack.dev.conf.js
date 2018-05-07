@@ -1,6 +1,7 @@
 'use strict'
 const utils = require('./utils')
 const webpack = require('webpack')
+const express = require('express')
 const config = require('../config')
 const merge = require('webpack-merge')
 const path = require('path')
@@ -9,9 +10,27 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
-
+const axios = require('axios')
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
+
+const app = express()
+const apiRoutes = express.Router()
+// apiRoutes.get('/getDiscList', function (req, res) {
+//   var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
+//   axios.get(url, {
+//     headers: {
+//       referer: 'https://c.y.qq.com/',
+//       host: 'c.y.qq.com'
+//     },
+//     params: req.query
+//   }).then((response) => {
+//     res.json(response.data)
+//   }).catch((e) => {
+//     console.log(e)
+//   })
+// })
+app.use('/api', apiRoutes)
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -42,7 +61,23 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
-    }
+    },
+    before(app){
+      app.get('/api/getDiscList', function (req, res) {
+        let url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
+        axios.get(url, {
+          headers: {
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
+          },
+          params: req.query
+        }).then((response) => {
+          res.json(response.data)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
+    },
   },
   plugins: [
     new webpack.DefinePlugin({
