@@ -1,6 +1,6 @@
 <template>
   <div class="recommend">
-    <scroll ref="scroll" class="recommend-content">
+    <scroll ref="scroll" class="recommend-content" :data="discList">
       <div>
         <div v-if="recommends.length" class="slider-wrapper">
           <slider>
@@ -16,7 +16,7 @@
           <ul>
             <li v-for="item in discList" :key="item.listennum" class="item">
               <div class="icon">
-                <img :src="item.imgurl" width="60" height="60" alt="">
+                <img v-lazy="item.imgurl" width="60" height="60" alt="">
               </div>
               <div class="text">
                 <h2 class="name" v-html="item.creator.name"></h2>
@@ -64,7 +64,10 @@ export default {
       })
     },
     imgLoad: function () {
-      this.$refs.scroll.refresh()
+      if (!this.imgLoaded) {
+        this.$refs.scroll.refresh()
+        this.imgLoaded = true
+      }
     }
   },
   watch: {
