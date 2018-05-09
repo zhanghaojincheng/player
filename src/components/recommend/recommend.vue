@@ -1,12 +1,12 @@
 <template>
   <div class="recommend">
-    <scroll class="recommend-content">
+    <scroll ref="scroll" class="recommend-content">
       <div>
         <div v-if="recommends.length" class="slider-wrapper">
           <slider>
             <div class="ssss" v-for="item in recommends" :key="item.id">
               <a :href="item.linkUrl">
-                <img :src="item.picUrl" alt="">
+                <img @load="imgLoad" :src="item.picUrl" alt="">
               </a>
             </div>
           </slider>
@@ -40,6 +40,7 @@ export default {
   components: { Slider, Scroll },
   data () {
     return {
+      a: 1,
       recommends: [],
       discList: []
     }
@@ -47,7 +48,6 @@ export default {
   created: function () {
     this._getRecommend()
     getDiscList().then(res => {
-      console.log(res)
       if (res.code === ERR_OK) {
         this.discList = res.data.list
       }
@@ -62,7 +62,13 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    imgLoad: function () {
+      this.$refs.scroll.refresh()
     }
+  },
+  watch: {
+
   }
 }
 
