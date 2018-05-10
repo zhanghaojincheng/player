@@ -1,21 +1,31 @@
 <template>
-  <div class="listview">
+  <scroll class="listview">
     <ul>
-      <li class="list-group">
-        <h2 class="list-group-title">标题</h2>
+      <li class="list-group" v-for="group in data" :key="group.title">
+        <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li class="list-group-item">
-            <img src="" class="avatar" alt="">
-            <span class="name">123</span>
+          <li class="list-group-item" v-for="item in group.items" :key="item.id">
+            <img v-lazy="item.avatar" class="avatar" alt="">
+            <span class="name">{{item.name}}</span>
           </li>
         </ul>
       </li>
     </ul>
-  </div>
+  </scroll>
 </template>
 
 <script>
+import Scroll from 'base/scroll/scroll'
 export default {
+  components: {
+    Scroll
+  },
+  props: {
+    data: {
+      type: Array,
+      default: null
+    }
+  },
   data () {
     return {
       list: []
@@ -23,7 +33,6 @@ export default {
   }
 }
 </script>
-
 
 <style scoped lang="stylus">
   @import "~common/stylus/variable"

@@ -1,18 +1,19 @@
 <template>
   <div class="singer">
-   <listview></listview>
+   <list-view :data="singers"></list-view>
   </div>
 </template>
 
 <script>
 import { getSingerList } from 'api/singer'
 import { ERR_OK } from 'api/config'
-import { Listview } from 'base/listview/listview'
+import ListView from 'base/listview/listview'
+import Singer from 'common/js/singer'
 const HOT_NAME = '热门'
 const HOT_SINGER_LEN = 10
 export default {
   components: {
-    Listview
+    ListView
   },
   data () {
     return {
@@ -27,8 +28,8 @@ export default {
       getSingerList()
         .then(res => {
           if (res.code === ERR_OK) {
-            this.singers = res.data.list
-            this._normalLizeSinger(this.singers)
+            this.singers = this._normalLizeSinger(res.data.list)
+            console.log(this.singers)
           }
         })
         .catch(err => {
@@ -44,10 +45,38 @@ export default {
       }
       list.forEach((val, idx) => {
         if (idx < HOT_SINGER_LEN) {
-          map.hot.items[idx] = val
+          map.hot.items.push(new Singer({
+            id: val.Fsinger_mid,
+            name: val.Fsinger_name
+          }))
         }
+        let key = val.Findex
+        if (!map[key]) {
+          map[key] = {
+            title: key,
+            items: []
+          }
+        }
+        map[key].items.push(new Singer({
+          id: val.Fsinger_mid,
+          name: val.Fsinger_name
+        }))
       })
-      console.log(map)
+      // console.log(map)
+      let hot = []
+      let ret = []
+      for(let i in map) {
+        let val = map[i]
+        if (val.title.match(/[a-zA-Z]/)) {
+          ret.push(val)
+        } else if (i === 'hot') {
+          hot.push(val)
+        }
+      }
+      ret.sort((a, b) => {
+        return a.title.charCodeAt(0) - b.title.charCodeAt(0)
+      })
+      return hot.concat(ret)
     }
   }
 }
