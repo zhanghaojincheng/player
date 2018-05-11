@@ -29,7 +29,6 @@ export default {
         .then(res => {
           if (res.code === ERR_OK) {
             this.singers = this._normalLizeSinger(res.data.list)
-            console.log(this.singers)
           }
         })
         .catch(err => {
@@ -65,7 +64,7 @@ export default {
       // console.log(map)
       let hot = []
       let ret = []
-      for(let i in map) {
+      for (let i in map) {
         let val = map[i]
         if (val.title.match(/[a-zA-Z]/)) {
           ret.push(val)

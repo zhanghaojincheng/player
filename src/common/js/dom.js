@@ -12,3 +12,16 @@ export function hasClass(el, className) {
   let reg = new RegExp('(^|\\s)' + className + '(\\s|$)')
   return reg.test(el.className)
 }
+export function attributeMethod (el, name, value) {
+  name = 'data-' + name
+  if (value) {
+    return el.setAttribute(name, value)
+  } else {
+    return el.getAttribute(name)
+  }
+}
+
+export function getCss(el, name) {
+  console.log(window.getComputedStyle(el, null)[name])
+  return window.getComputedStyle(el, null)[name]
+}

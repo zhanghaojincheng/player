@@ -11,6 +11,9 @@ export default {
     return {
       msg: 1
     }
+  },
+  methods: {
+
   }
 }
 </script>

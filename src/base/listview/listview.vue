@@ -1,7 +1,12 @@
 <template>
-  <scroll class="listview">
+  <scroll class="listview"
+          ref="listview"
+          :listenScroll="listenScroll"
+          :probeType="probeType"
+          @scroll="listenChangeScroll"
+  >
     <ul>
-      <li class="list-group" v-for="group in data" :key="group.title">
+      <li class="list-group" v-for="group in data" :key="group.title" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
           <li class="list-group-item" v-for="item in group.items" :key="item.id">
@@ -11,14 +16,31 @@
         </ul>
       </li>
     </ul>
+    <div class="list-shortcut" @touchstart.prevent.stop="onShortcutTouchStart" @touchmove="onShortcutTouchMove">
+      <ul ref="letterList">
+        <li class="item" :class="{current : index === touchIndex}" v-for="(item, index) in shortcutList" :data-index="index" :key="index">{{item}}</li>
+      </ul>
+    </div>
   </scroll>
 </template>
 
 <script>
 import Scroll from 'base/scroll/scroll'
+import { attributeMethod } from 'common/js/dom'
 export default {
   components: {
     Scroll
+  },
+  created () {
+    this.touch = {}
+  },
+  mounted () {
+
+  },
+  updated () {
+    this._computedHeight()
+    this.letterHeight = this.$refs.letterList.firstChild.clientHeight
+    this.scrollView = this.$refs.listview
   },
   props: {
     data: {
@@ -28,7 +50,58 @@ export default {
   },
   data () {
     return {
-      list: []
+      touchIndex: 0,
+      listenScroll: true,
+      probeType: 3
+    }
+  },
+  computed: {
+    shortcutList: function () {
+      return this.data.map((group) => {
+        return group.title.substring(0, 1)
+      })
+    }
+  },
+  methods: {
+    onShortcutTouchStart (e) {
+      this.touch.y1 = e.touches[0].pageY
+      this.tempIndex = attributeMethod(e.target, 'index')
+      // this.touchIndex = +this.tempIndex
+      this.scrollTo(this.tempIndex)
+    },
+    onShortcutTouchMove (e) {
+      this.touch.y2 = e.touches[0].pageY
+      let movedHeight = this.touch.y2 - this.touch.y1
+      let moveNumber = Math.ceil(movedHeight / this.letterHeight) + (+this.tempIndex)
+      // this.touchIndex = moveNumber
+      this.scrollTo(moveNumber)
+    },
+    scrollTo (index) {
+      this.scrollView.scrollToElement(this.$refs.listGroup[index], 0)
+    },
+    listenChangeScroll (pos) {
+      let scrollY = pos.y
+      if (scrollY > 0) {
+        this.touchIndex = 0
+        return
+      }
+      for (let i = 0; i < this.letterHeightArray.length; i++) {
+
+        if (-scrollY < this.letterHeightArray[i] && -scrollY > this.letterHeightArray[i - 1]) {
+          this.touchIndex = i + 1
+          break
+        }
+      }
+    },
+    _computedHeight () {
+      let list = this.$refs.listGroup
+      let arr = []
+      let height = 0
+      for (let i = 0; i < list.length; i++) {
+        height += list[i].clientHeight
+        arr.push(height)
+      }
+      this.letterHeightArray = arr
     }
   }
 }
