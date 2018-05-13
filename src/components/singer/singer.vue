@@ -1,6 +1,7 @@
 <template>
   <div class="singer">
-   <list-view :data="singers"></list-view>
+   <list-view @singerdetail="_getSingerDetail" :data="singers"></list-view>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -76,6 +77,9 @@ export default {
         return a.title.charCodeAt(0) - b.title.charCodeAt(0)
       })
       return hot.concat(ret)
+    },
+    _getSingerDetail (val) {
+      this.$router.push({ path: `/singer/${val.id}` })
     }
   }
 }

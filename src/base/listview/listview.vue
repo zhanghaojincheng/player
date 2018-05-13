@@ -9,7 +9,7 @@
       <li class="list-group" v-for="group in data" :key="group.title" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li class="list-group-item" v-for="item in group.items" :key="item.id">
+          <li class="list-group-item" v-for="item in group.items" :key="item.id" @click="getSingerDetails(item)">
             <img v-lazy="item.avatar" class="avatar" alt="">
             <span class="name">{{item.name}}</span>
           </li>
@@ -81,6 +81,9 @@ export default {
       let moveNumber = Math.round(movedHeight / this.letterHeight) + (+this.tempIndex)
       this.scrollTo(moveNumber)
     },
+    getSingerDetails (val) {
+      this.$emit('singerdetail', val)
+    },
     scrollTo (index) {
       if (index === null || (index < 0) || (index > this.shortcutList.length - 1)) {
         return
@@ -101,11 +104,11 @@ export default {
         arr.push(height)
       }
       this.letterHeightArray = arr
-      console.log(arr)
     }
   },
   watch: {
-    data () {
+    data (val) {
+      console.log(val)
       setTimeout(() => {
         this._computedHeight()
         this.letterHeight = this.$refs.letterList.firstChild.clientHeight
