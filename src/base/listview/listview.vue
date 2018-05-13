@@ -66,14 +66,14 @@ export default {
     onShortcutTouchStart (e) {
       this.touch.y1 = e.touches[0].pageY
       this.tempIndex = attributeMethod(e.target, 'index')
-      // this.touchIndex = +this.tempIndex
+      this.touchIndex = +this.tempIndex
       this.scrollTo(this.tempIndex)
     },
     onShortcutTouchMove (e) {
       this.touch.y2 = e.touches[0].pageY
       let movedHeight = this.touch.y2 - this.touch.y1
-      let moveNumber = Math.ceil(movedHeight / this.letterHeight) + (+this.tempIndex)
-      // this.touchIndex = moveNumber
+      let moveNumber = Math.round(movedHeight / this.letterHeight) + (+this.tempIndex)
+      this.touchIndex = moveNumber
       this.scrollTo(moveNumber)
     },
     scrollTo (index) {
@@ -86,9 +86,8 @@ export default {
         return
       }
       for (let i = 0; i < this.letterHeightArray.length; i++) {
-
         if (-scrollY < this.letterHeightArray[i] && -scrollY > this.letterHeightArray[i - 1]) {
-          this.touchIndex = i + 1
+          this.touchIndex = i - 1
           break
         }
       }
@@ -97,11 +96,13 @@ export default {
       let list = this.$refs.listGroup
       let arr = []
       let height = 0
+      arr.push(height)
       for (let i = 0; i < list.length; i++) {
         height += list[i].clientHeight
         arr.push(height)
       }
       this.letterHeightArray = arr
+      console.log(arr)
     }
   }
 }
