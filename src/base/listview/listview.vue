@@ -50,6 +50,7 @@ export default {
   },
   data () {
     return {
+      scrollY: -1,
       touchIndex: 0,
       listenScroll: true,
       probeType: 3
@@ -80,17 +81,7 @@ export default {
       this.scrollView.scrollToElement(this.$refs.listGroup[index], 0)
     },
     listenChangeScroll (pos) {
-      let scrollY = pos.y
-      if (scrollY > 0) {
-        this.touchIndex = 0
-        return
-      }
-      for (let i = 0; i < this.letterHeightArray.length; i++) {
-        if (-scrollY < this.letterHeightArray[i] && -scrollY > this.letterHeightArray[i - 1]) {
-          this.touchIndex = i - 1
-          break
-        }
-      }
+      this.scrollY = pos.y
     },
     _computedHeight () {
       let list = this.$refs.listGroup
@@ -102,7 +93,21 @@ export default {
         arr.push(height)
       }
       this.letterHeightArray = arr
-      console.log(arr)
+      // console.log(arr)
+    }
+  },
+  watch: {
+    scrollY: function () {
+      if (this.scrollY > 0) {
+        this.touchIndex = 0
+        return
+      }
+      for (let i = 0; i < this.letterHeightArray.length; i++) {
+        if (-this.scrollY < this.letterHeightArray[i] && -this.scrollY > this.letterHeightArray[i - 1]) {
+          this.touchIndex = i - 1
+          break
+        }
+      }
     }
   }
 }
