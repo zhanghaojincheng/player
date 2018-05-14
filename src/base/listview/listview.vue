@@ -108,7 +108,7 @@ export default {
   },
   watch: {
     data (val) {
-      console.log(val)
+      // console.log(val)
       setTimeout(() => {
         this._computedHeight()
         this.letterHeight = this.$refs.letterList.firstChild.clientHeight
