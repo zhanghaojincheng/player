@@ -7,7 +7,10 @@
     <div class="bg-image" ref="bgImage">
       <div class="filter" :style="bgStyle"></div>
     </div>
-    <scroll :data="songs" class="list" ref="scroll">
+    <div class="bg-layer" ref="layer">
+
+    </div>
+    <scroll @scroll="listenScrolla" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="scroll">
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
       </div>
@@ -18,7 +21,7 @@
 <script>
 import SongList from 'base/song-list/song-list'
 import Scroll from 'base/scroll/scroll'
-import { getCss } from 'common/js/dom'
+const topHeight = 40
 export default {
   components: {
     SongList,
@@ -40,7 +43,7 @@ export default {
   },
   data () {
     return {
-      msg: 1
+      scrollY: 0
     }
   },
   computed: {
@@ -51,6 +54,10 @@ export default {
       }
     }
   },
+  created () {
+    this.probeType = 3
+    this.listenScroll = true
+  },
   mounted () {
     this._setScrollTop()
   },
@@ -59,7 +66,25 @@ export default {
       this.$router.go(-1)
     },
     _setScrollTop () {
-      this.$refs.scroll.$el.style.top = this.$refs.bgImage.clientHeight + 'px'
+      this.imageHeight = this.$refs.bgImage.clientHeight
+      this.minTranslateY = -this.imageHeight + topHeight
+      this.$refs.scroll.$el.style.top = this.imageHeight + 'px'
+    },
+    // 监听scroll
+    listenScrolla (pos) {
+      this.scrollY = pos.y
+    }
+  },
+  watch: {
+    scrollY (newY) {
+      console.log(newY)
+      console.log(this.minTranslateY)
+      let translateY = Math.max(this.minTranslateY, newY)
+      let zIndex = 0
+      this.$refs.layer.style.transform = `translate3d(0, ${translateY}px, 0)`
+      if(newY < this.minTranslateY) {
+
+      }
     }
   }
 }
@@ -141,6 +166,7 @@ export default {
       height: 100%
       background: $color-background
     .list
+      /*overflow :hidden*/
       position: fixed
       top: 0
       bottom: 0
