@@ -5,7 +5,7 @@
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" ref="bgImage">
-      <div class="filter" :style="bgStyle"></div>
+      <div class="filter" :style="bgStyle" ref="filter"></div>
     </div>
     <div class="bg-layer" ref="layer">
 
@@ -21,7 +21,7 @@
 <script>
 import SongList from 'base/song-list/song-list'
 import Scroll from 'base/scroll/scroll'
-const topHeight = 40
+const TOP_HEIGHT = 40
 export default {
   components: {
     SongList,
@@ -67,7 +67,7 @@ export default {
     },
     _setScrollTop () {
       this.imageHeight = this.$refs.bgImage.clientHeight
-      this.minTranslateY = -this.imageHeight + topHeight
+      this.minTranslateY = -this.imageHeight + TOP_HEIGHT
       this.$refs.scroll.$el.style.top = this.imageHeight + 'px'
     },
     // 监听scroll
@@ -77,14 +77,31 @@ export default {
   },
   watch: {
     scrollY (newY) {
-      console.log(newY)
-      console.log(this.minTranslateY)
       let translateY = Math.max(this.minTranslateY, newY)
       let zIndex = 0
+      let scale = 1 // 背景尺寸
+      let blur = 0  // 背景模糊度
       this.$refs.layer.style.transform = `translate3d(0, ${translateY}px, 0)`
-      if(newY < this.minTranslateY) {
-
+      if (newY < this.minTranslateY) {
+        zIndex = 10
+        this.$refs.bgImage.style.paddingTop = 0
+        this.$refs.bgImage.style.height = `${TOP_HEIGHT}px`
+      } else {
+        zIndex = 0
+        this.$refs.bgImage.style.paddingTop = '70%'
+        this.$refs.bgImage.style.height = 0
+        if (newY > 0) {
+          zIndex = 10
+          let percent = Math.abs(newY / this.imageHeight)
+          blur = Math.min(20 * percent, 20)
+          scale = 1 + percent
+        }
+        this.$refs.filter.style['backdrop-filter'] = `blur(${blur}px)`
+        this.$refs.filter.style['webkit-Backdrop-filter'] = `blur(${blur}px)`
+        this.$refs.filter.style['filter'] = `blur(${blur}px)`
       }
+      this.$refs.bgImage.style.zIndex = zIndex
+      this.$refs.bgImage.style.transform = `scale(${scale}, ${scale})`
     }
   }
 }
@@ -129,7 +146,7 @@ export default {
       height: 0
       padding-top: 70%
       transform-origin: top
-      background-size: cover
+      background-size: contain
       .play-wrapper
         position: absolute
         bottom: 20px
