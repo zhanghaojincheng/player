@@ -25,3 +25,26 @@ export function getCss(el, name) {
   console.log(window.getComputedStyle(el, null)[name])
   return window.getComputedStyle(el, null)[name]
 }
+
+let elementsStyle = document.createElement('div').style
+let vendor = (() => {
+  let transformNames = {
+    webkit: 'webkitTransform',
+    Moz: 'MozTransform',
+    O: 'OTransform',
+    ms: 'msTransform',
+    standard: 'transform'
+  }
+
+  for (let key in transformNames) {
+    if (elementsStyle[transformNames[key]] !== undefined) {
+      return key
+    }
+  }
+  return false
+})()
+console.log(vendor)
+
+export function prefixStyle(attr) {
+  return `${vendor}${attr.charAt(0).toLocaleUpperCase()}${attr.substring(1)}`
+}

@@ -22,6 +22,9 @@ export default {
       singers: []
     }
   },
+  activated () {
+    console.log('我来了')
+  },
   created: function () {
     this._getSingerList()
   },

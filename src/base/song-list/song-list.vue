@@ -25,9 +25,7 @@ export default {
     }
   },
   mounted () {
-    setTimeout(() => {
-      console.log(this.songs)
-    }, 2000)
+
   },
   methods: {
     getDesc (song) {
