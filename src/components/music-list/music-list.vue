@@ -157,7 +157,7 @@ export default {
       height: 0
       padding-top: 70%
       transform-origin: top
-      background-size: contain
+      background-size: cover
       .play-wrapper
         position: absolute
         bottom: 20px
@@ -194,7 +194,6 @@ export default {
       height: 100%
       background: $color-background
     .list
-      /*overflow :hidden*/
       position: fixed
       top: 0
       bottom: 0

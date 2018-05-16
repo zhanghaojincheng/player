@@ -43,7 +43,7 @@ let vendor = (() => {
   }
   return false
 })()
-console.log(vendor)
+// console.log(vendor)
 
 export function prefixStyle(attr) {
   return `${vendor}${attr.charAt(0).toLocaleUpperCase()}${attr.substring(1)}`
