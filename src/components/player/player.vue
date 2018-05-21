@@ -76,7 +76,9 @@ import {prefixStyle} from 'common/js/dom'
 const transform = prefixStyle('transform')
 export default {
   data() {
-    return {}
+    return {
+      msg: 'hahaha'
+    }
   },
   created() {
     this._getPosAndScale()
