@@ -32,13 +32,13 @@
               <i class="icon-sequence"></i>
             </div>
             <div class="icon i-left">
-              <i class="icon-prev"></i>
+              <i class="icon-prev" @click="prev"></i>
             </div>
             <div class="icon i-center">
               <i :class="playIcon" @click="togglePlaying"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon-next"></i>
+              <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
               <i class="icon icon-not-favorite"></i>
@@ -64,7 +64,7 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url"></audio>
+    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error"></audio>
   </div>
 </template>
 
@@ -77,9 +77,11 @@ const transform = prefixStyle('transform')
 export default {
   data() {
     return {
-      msg: 'hahaha'
+      msg: 'hahaha',
+      songReady: true
     }
   },
+
   created() {
     this._getPosAndScale()
   },
@@ -88,7 +90,6 @@ export default {
   },
   computed: {
     playIcon () {
-      console.log(this.playing)
       return this.playing ? 'icon-pause' : 'icon-play'
     },
     miniIcon () {
@@ -102,7 +103,8 @@ export default {
       'fullScreen',
       'playlist',
       'currentSong',
-      'playing'
+      'playing',
+      'currentIndex'
     ])
   },
   watch: {
@@ -116,12 +118,16 @@ export default {
       this.$nextTick(() => {
         newPlaying ? audio.play() : audio.pause()
       })
+    },
+    currentIndex(newVal) {
+      this.setCurrentIndex(newVal)
     }
   },
   methods: {
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
-      setPlayingState: 'SET_PLAYING_STATE'
+      setPlayingState: 'SET_PLAYING_STATE',
+      setCurrentIndex: 'SET_CURRENT_INDEX'
     }),
     back() {
       this.setFullScreen(false)
@@ -132,6 +138,32 @@ export default {
     // 播放按钮
     togglePlaying() {
       this.setPlayingState(!this.playing)
+    },
+    // 上一首
+    prev() {
+      if (this.songReady) {
+        this.songReady = false
+        this.setCurrentIndex(this.currentIndex === 0 ? this.playlist.length - 1 : this.currentIndex - 1)
+        if (!this.playing) {
+          this.setPlayingState(true)
+        }
+      }
+    },
+    // 下一首
+    next() {
+      if (this.songReady) {
+        this.songReady = false
+        this.setCurrentIndex(this.currentIndex === this.playlist.length - 1 ? 0 : this.currentIndex + 1)
+        if (!this.playing) {
+          this.setPlayingState(true)
+        }
+      }
+    },
+    ready () {
+      this.songReady = true
+    },
+    error () {
+
     },
     enter(el, done) {
       const {x, y, scale} = this._getPosAndScale()
