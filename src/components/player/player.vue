@@ -27,17 +27,22 @@
           </div>
         </div>
         <div class="bottom">
+          <div class="progress-wrapper">
+            <span class="time time-l">{{format(currentTime)}}</span>
+            <div class="progress-bar-wrapper"></div>
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
             </div>
-            <div class="icon i-left">
+            <div class="icon i-left" :class="disableCls">
               <i class="icon-prev" @click="prev"></i>
             </div>
-            <div class="icon i-center">
+            <div class="icon i-center" :class="disableCls">
               <i :class="playIcon" @click="togglePlaying"></i>
             </div>
-            <div class="icon i-right">
+            <div class="icon i-right" :class="disableCls">
               <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
@@ -64,7 +69,12 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error"></audio>
+    <audio ref="audio"
+           :src="currentSong.url"
+           @canplay="ready"
+           @error="error"
+           @timeupdate="updateTime"
+    ></audio>
   </div>
 </template>
 
@@ -77,7 +87,7 @@ const transform = prefixStyle('transform')
 export default {
   data() {
     return {
-      msg: 'hahaha',
+      currentTime: 0,
       songReady: true
     }
   },
@@ -97,6 +107,9 @@ export default {
     },
     cdCls () {
       return this.playing ? 'play' : 'play pause'
+    },
+    disableCls () {
+      return this.songReady ? '' : 'disable'
     },
     ...mapGetters([
       'singer',
@@ -163,7 +176,25 @@ export default {
       this.songReady = true
     },
     error () {
-
+      this.songReady = true
+    },
+    // audio标签播放触发的事件
+    updateTime (e) {
+      this.currentTime = e.target.currentTime
+    },
+    format (val) {
+      let interval = val | 0
+      let min = this._pad(interval / 60 | 0)
+      let second = this._pad(interval % 60 | 0)
+      return `${min}:${second}`
+    },
+    _pad (val, n = 2) {
+      let len = val.toString().length
+      while (len < n) {
+        val = '0' + val
+        len++
+      }
+      return val
     },
     enter(el, done) {
       const {x, y, scale} = this._getPosAndScale()
