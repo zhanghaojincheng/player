@@ -78,6 +78,7 @@
            @canplay="ready"
            @error="error"
            @timeupdate="updateTime"
+           @ended="end"
     ></audio>
   </div>
 </template>
@@ -176,6 +177,18 @@ export default {
     // 播放按钮
     togglePlaying() {
       this.setPlayingState(!this.playing)
+    },
+    end () {
+      if (this.mode === playMode.loop) {
+        this.loop()
+      } else {
+        this.next()
+      }
+    },
+    // 当单曲循环的时候,歌曲结束后
+    loop () {
+      this.$refs.audio.currentTime = 0
+      this.$refs.audio.play()
     },
     // 上一首
     prev() {
