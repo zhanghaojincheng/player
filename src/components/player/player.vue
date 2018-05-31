@@ -91,6 +91,7 @@ import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
+// 获取歌词接口
 
 const transform = prefixStyle('transform')
 export default {
@@ -148,6 +149,9 @@ export default {
       }
       this.$nextTick(() => {
         this.$refs.audio.play()
+        this.currentSong.getLyric()
+        // 拿到了歌词的数据 引入了parser模块 下一步，do the lyric position
+        console.log(this.currentSong)
       })
     },
     playing(newPlaying) {

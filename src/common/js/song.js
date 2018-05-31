@@ -1,3 +1,5 @@
+import { getLyric } from 'api/song'
+
 export default class Song {
   constructor({id, mid, singer, name, album, duration, image, url}) {
     this.id = id
@@ -8,6 +10,29 @@ export default class Song {
     this.duration = duration
     this.image = image
     this.url = url
+  }
+  getLyric() {
+    if (this.lyric) {
+      return Promise.resolve(this.lyric)
+    } else {
+      return new Promise((resolve, reject) => {
+        getLyric(this.id)
+          .then(res => {
+            if (typeof res === 'string') {
+              let reg = /^\w+\(({[^()]+})\)$/
+              let matches = res.match(reg)
+              if (matches) {
+                res = changeLyricFormat(JSON.parse(matches[1]).lyric)
+              }
+              this.lyric = res
+              resolve(this.lyric)
+            }
+          })
+          .catch(() => {
+            resolve('no lyric')
+          })
+      })
+    }
   }
 }
 
@@ -20,7 +45,7 @@ export function createSong(musicData) {
     album: musicData.albumname,
     duration: musicData.interval,
     image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
-    url: `http://dl.stream.qqmusic.qq.com/C400${musicData.songmid}.m4a?guid=5210737808&vkey=92B298BAF670ACCE2B91F4A18EABAA2BD67F5C2FDA9712989AEF7913C4C2C3D74A02D673ABF2DD549ECD67275B8339F90E9EE420F09827D1&uin=0&fromtag=38`
+    url: `http://dl.stream.qqmusic.qq.com/C400${musicData.songmid}.m4a?guid=5210737808&vkey=3CEA29A1F7335F156E366DD28BBE6D30E453155CEF4CBF7BD6B9702FD2E084513BD1FECD9C0C9D3E5A779FAFB0588E5D5694B1C470952DF1&uin=0&fromtag=38`
   })
 }
 function filterSinger(singer) {
@@ -32,4 +57,10 @@ function filterSinger(singer) {
     ret.push(s.name)
   })
   return ret.join('/')
+}
+
+export function changeLyricFormat(str) {
+  let dom = document.createElement('div')
+  dom.innerHTML = str
+  return dom.innerHTML
 }
