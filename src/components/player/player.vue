@@ -91,6 +91,7 @@ import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
+import Lyric from 'lyric-parser'
 // 获取歌词接口
 
 const transform = prefixStyle('transform')
@@ -102,7 +103,8 @@ export default {
   data() {
     return {
       currentTime: 0,
-      songReady: true
+      songReady: true,
+      currentLyric: null
     }
   },
 
@@ -149,9 +151,10 @@ export default {
       }
       this.$nextTick(() => {
         this.$refs.audio.play()
-        this.currentSong.getLyric()
+        this.getLyric()
+        // this.currentSong.getLyric()
         // 拿到了歌词的数据 引入了parser模块 下一步，do the lyric position
-        console.log(this.currentSong)
+        // console.log(this.currentSong)
       })
     },
     playing(newPlaying) {
@@ -229,6 +232,12 @@ export default {
       let min = this._pad(interval / 60 | 0)
       let second = this._pad(interval % 60 | 0)
       return `${min}:${second}`
+    },
+    getLyric() {
+      this.currentSong.getLyric().then(lyric => {
+        this.currentLyric = new Lyric(lyric)
+        console.log(this.currentLyric)
+      })
     },
     _pad (val, n = 2) {
       let len = val.toString().length
