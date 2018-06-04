@@ -25,6 +25,17 @@
               </div>
             </div>
           </div>
+          <scroll class="middle-r" :data="currentLyric && currentLyric.lines">
+            <div class="lyric-wrapper">
+              <div v-if="currentLyric">
+                <p ref="lyricline" class="text"
+                   :class="{current: currentLineNum === idx}"
+                   v-for="(line, idx) in currentLyric.lines" :key="line.time">
+                  {{line.txt}}
+                </p>
+              </div>
+            </div>
+          </scroll>
         </div>
         <div class="bottom">
           <div class="progress-wrapper">
@@ -92,19 +103,22 @@ import ProgressCircle from 'base/progress-circle/progress-circle'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
 import Lyric from 'lyric-parser'
+import Scroll from 'base/scroll/scroll'
 // 获取歌词接口
 
 const transform = prefixStyle('transform')
 export default {
   components: {
     ProgressBar,
-    ProgressCircle
+    ProgressCircle,
+    Scroll
   },
   data() {
     return {
       currentTime: 0,
       songReady: true,
-      currentLyric: null
+      currentLyric: null,
+      currentLineNum: 0
     }
   },
 
@@ -235,9 +249,16 @@ export default {
     },
     getLyric() {
       this.currentSong.getLyric().then(lyric => {
-        this.currentLyric = new Lyric(lyric)
+        this.currentLyric = new Lyric(lyric, this.handleLyric)
         console.log(this.currentLyric)
+        if (this.playing) {
+          this.currentLyric.play()
+        }
       })
+    },
+    // 歌词被移动的时候 触发的回掉函数
+    handleLyric(lyricInfo) {
+      this.currentLineNum = lyricInfo.lineNum
     },
     _pad (val, n = 2) {
       let len = val.toString().length
