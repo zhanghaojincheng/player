@@ -17,7 +17,10 @@
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle" v-html="currentSong.singer"></h2>
         </div>
-        <div class="middle">
+        <div class="middle"
+        @touchstart.prevent="middleTouchStart"
+        @touchmove.prevent="middleTouchMove"
+        @touchend="middleTouchEnd">
           <div class="middle-l">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd" :class="cdCls">
@@ -25,7 +28,7 @@
               </div>
             </div>
           </div>
-          <scroll class="middle-r" :data="currentLyric && currentLyric.lines">
+          <scroll class="middle-r" ref="lyriclist" :data="currentLyric && currentLyric.lines">
             <div class="lyric-wrapper">
               <div v-if="currentLyric">
                 <p ref="lyricline" class="text"
@@ -38,6 +41,10 @@
           </scroll>
         </div>
         <div class="bottom">
+          <div class="dot-wrapper">
+            <span class="dot" :class="{active: currentShow === 'cd'}"></span>
+            <span class="dot" :class="{active: currentShow === 'lyric'}"></span>
+          </div>
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
@@ -118,12 +125,14 @@ export default {
       currentTime: 0,
       songReady: true,
       currentLyric: null,
-      currentLineNum: 0
+      currentLineNum: 0,
+      // 当前显示是歌词还是cd
+      currentShow: 'cd'
     }
   },
 
   created() {
-    this._getPosAndScale()
+    this.touch = {}
   },
   mounted() {
 
@@ -258,7 +267,14 @@ export default {
     },
     // 歌词被移动的时候 触发的回掉函数
     handleLyric(lyricInfo) {
-      this.currentLineNum = lyricInfo.lineNum
+      let lineNum = lyricInfo.lineNum
+      this.currentLineNum = lineNum
+      if (lineNum > 5) {
+        let lineEl = this.$refs.lyricline[lineNum - 5]
+        this.$refs.lyriclist.scrollToElement(lineEl, 1000)
+      } else {
+        this.$refs.lyriclist.scrollToElement(this.$refs.lyricline[0], 1000)
+      }
     },
     _pad (val, n = 2) {
       let len = val.toString().length
@@ -306,6 +322,7 @@ export default {
       this.$refs.cdWrapper.style.transition = ''
       this.$refs.cdWrapper.style[transform] = ''
     },
+    // cd动画
     _getPosAndScale() {
       const targetWidth = 40
       const paddingLeft = 40
@@ -320,6 +337,29 @@ export default {
         y,
         scale
       }
+    },
+    // 歌词页面的左右滑动 显示cd还是歌词
+    middleTouchStart(e) {
+      this.touch.initiated = true
+      const touch = e.touches[0]
+      this.touch.startX = touch.pageX
+      this.touch.startY = touch.pageY
+    },
+    middleTouchMove(e) {
+      if (!this.touch.initiated) return
+      const touch = e.touches[0]
+      const deltaX = touch.pageX - this.touch.startX
+      const deltaY = touch.pageY - this.touch.startY
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        return
+      }
+      const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
+      const width = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
+      // 因爲是兩頁，所以最大限制往左滑動一個屏幕的距離，最小是0
+      this.$refs.lyriclist.$el.style[transform] = `translate3d(${width}px, 0, 0)`
+    },
+    middleTouchEnd(e) {
+      console.log(e)
     },
     onProgressBarChange (percent) {
       this.$refs.audio.currentTime = this.currentSong.duration * percent
