@@ -21,7 +21,7 @@
         @touchstart.prevent="middleTouchStart"
         @touchmove.prevent="middleTouchMove"
         @touchend="middleTouchEnd">
-          <div class="middle-l">
+          <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd" :class="cdCls">
                 <img :src="currentSong.image" class="image" alt="">
@@ -114,6 +114,8 @@ import Scroll from 'base/scroll/scroll'
 // 获取歌词接口
 
 const transform = prefixStyle('transform')
+const transitionDuration = prefixStyle('transitionDuration')
+
 export default {
   components: {
     ProgressBar,
@@ -354,12 +356,37 @@ export default {
         return
       }
       const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
-      const width = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
+      const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
       // 因爲是兩頁，所以最大限制往左滑動一個屏幕的距離，最小是0
-      this.$refs.lyriclist.$el.style[transform] = `translate3d(${width}px, 0, 0)`
+      this.$refs.lyriclist.$el.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
+      // 滑動比例
+      this.touch.percent = Math.abs(offsetWidth) / window.innerWidth
+      this.$refs.middleL.style.opacity = `${1 - this.touch.percent}`
+      // 移动的时候不要过渡效果
+      this.$refs.middleL.style[transitionDuration] = `0s`
+      this.$refs.lyriclist.$el.style[transitionDuration] = `0s`
     },
-    middleTouchEnd(e) {
-      console.log(e)
+    middleTouchEnd() {
+      let offsetWidth = 0
+      let opacityVal = 1
+      if (this.currentShow === 'cd') {
+        if (this.touch.percent > 0.1) {
+          offsetWidth = -window.innerWidth
+          this.currentShow = 'lyric'
+          opacityVal = 0
+        }
+      } else {
+        if (this.touch.percent < 0.9) {
+          this.currentShow = 'cd'
+        } else {
+          offsetWidth = -window.innerWidth
+          opacityVal = 0
+        }
+      }
+      this.$refs.middleL.style[transitionDuration] = `.5s`
+      this.$refs.middleL.style.opacity = opacityVal
+      this.$refs.lyriclist.$el.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
+      this.$refs.lyriclist.$el.style[transitionDuration] = `.5s`
     },
     onProgressBarChange (percent) {
       this.$refs.audio.currentTime = this.currentSong.duration * percent
